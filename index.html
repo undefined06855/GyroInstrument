@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html dir="ltr" lang="en">
+    <head>
+        <title> Device Instrument </title>
+
+        <style>
+            * {
+                margin: 0;
+                padding: 0; 
+            }
+
+            #wrapper, #alert-wrapper {
+                position: fixed;
+                top: 0;
+                left: 0;
+
+                width: 100vw;
+                height: 100vh;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #wrapper {
+                background-color: #ffa500ff;
+                background: conic-gradient( #ffa500ff 0.25turn, #ffb121ff 0.25turn 0.5turn, #ffa500ff 0.5turn 0.75turn, #ffb121ff 0.75turn ) top left / 50% 50% repeat;
+            }
+
+            #menu {
+                width: 70vw;
+                height: 20vh;
+
+                background-color: #fff;
+                border-radius: 10px;
+                border: 2px solid black;
+
+                padding: 5px;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .button {
+                padding: 20px;
+                width: auto;
+                min-width: 20%;
+            }
+
+            #alert-wrapper {
+                top: -30vh;
+            }
+
+
+            #alert {
+                text-align: center;
+                padding: 30px;
+                background-color: rgba(0, 0, 0, .5);
+                border-radius: 5px;
+                font-family: "Ubuntu", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="wrapper">
+            <div id="menu">
+                <button id="sinBTN" btnID="0" class="button">Si&shy;ne</button>
+                <button id="sqrBTN" btnID="1" class="button">Squ&shy;are</button>
+                <button id="sawBTN" btnID="2" class="button">Saw&shy;tooth</button>
+                <button id="triBTN" btnID="3" class="button">Tri&shy;angle</button>
+            </div>
+        </div>
+
+        <div id="alert-wrapper">
+            <div id="alert">
+                This will not work if your device does not have a gyroscope. It is recommended to do this on a mobile device.<br/><br/>Tap to continue.
+            </div>
+        </div>
+
+        <script>
+            var choice = "sine"
+              , o, ctx;
+
+            choices = [
+                "sine",
+                "square",
+                "sawtooth",
+                "triangle"
+            ]
+
+            function restart()
+            {
+                try { o.stop(0); }
+                catch(e) {;}
+
+                ctx = new AudioContext()
+                o   = new OscillatorNode(ctx, {
+                    type: choice,
+                });
+
+                o.connect(ctx.destination);
+                o.start();
+            }
+
+            document.getElementById("alert").addEventListener("click", event => {
+                document.getElementById("alert-wrapper").remove();
+                document.getElementById("wrapper").requestFullscreen();
+
+                window.addEventListener("deviceorientation", event => {
+                    console.log(event.gamma)
+                    o.frequency.setValueAtTime(2 * (event.gamma + 90), ctx.currentTime)
+                })
+
+                restart();
+            });
+
+            const buttons = document.querySelectorAll("button");
+
+            for( var i = 0; i < buttons.length; i++)
+            {
+                buttons[i].addEventListener("click", event => {
+                    choice = choices[event.target.getAttribute("btnID")].toString()
+                    restart();
+                })
+            }
+
+
+        </script>
+    </body>
+</html>
